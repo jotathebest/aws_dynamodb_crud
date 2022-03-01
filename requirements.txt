@@ -1,0 +1,6 @@
+boto3~=1.21.8
+requests
+chalice~=1.26.6
+marshmallow-dataclass
+dataclasses-json
+marshmallow~=3.14.1
