@@ -3,7 +3,6 @@ from chalicelib.responses.base import base_error_json, base_success_json
 
 
 class UsersCreationErrors:
-
     @staticmethod
     def json_body_is_empty() -> Response:
         message = "you are not sending the user data in your request"
@@ -33,7 +32,6 @@ class UsersCreationErrors:
 
 
 class UsersRetrievalErrors:
-
     @staticmethod
     def user_id_is_not_valid() -> Response:
         status_code = 400
@@ -48,7 +46,6 @@ class UsersRetrievalErrors:
 
 
 class UserCreationSuccess:
-
     @staticmethod
     def user_added_to_dynamo_db():
         message = "user has been successfully added to the DB"
@@ -57,7 +54,6 @@ class UserCreationSuccess:
 
 
 class UsersRetrievalSuccess:
-
     @staticmethod
     def user_retrieved(user_data: dict):
         message = "user retrieved properly"
@@ -67,7 +63,6 @@ class UsersRetrievalSuccess:
 
 
 class UserUpdateErrors:
-
     @staticmethod
     def user_could_not_be_updated(errors: str):
         status_code = 500
@@ -98,7 +93,6 @@ class UserUpdateErrors:
 
 
 class UserUpdateSuccess:
-
     @staticmethod
     def user_updated():
         status_code = 200
@@ -107,7 +101,6 @@ class UserUpdateSuccess:
 
 
 class UserDeleteErrors:
-
     @staticmethod
     def user_does_not_exist():
         status_code = 404
@@ -126,7 +119,6 @@ class UserDeleteErrors:
 
 
 class UserDeleteSuccess:
-
     @staticmethod
     def user_deleted():
         message = "user deleted"

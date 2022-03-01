@@ -7,7 +7,6 @@ from chalicelib.utils.utils import get_int
 
 
 class HandlerUser:
-
     def __init__(self):
         self.porter_db = PorterDB()
 
@@ -53,4 +52,3 @@ class HandlerUser:
 
         user = user_validation["user"]
         return self.porter_db.update_user(user)
-

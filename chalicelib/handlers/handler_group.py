@@ -5,7 +5,6 @@ from chalicelib.responses.groups import GroupErrors
 
 
 class HandlerGroup:
-
     def __init__(self):
         self.porter_db = PorterDB()
 

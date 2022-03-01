@@ -4,17 +4,25 @@ from boto3.dynamodb.conditions import Key, Attr
 from chalice import Response
 
 from chalicelib.responses.groups import GroupErrors, GroupSuccessQuery
-from chalicelib.responses.users import UsersCreationErrors, UserCreationSuccess, UsersRetrievalSuccess, \
-    UserUpdateSuccess, UserUpdateErrors, UserDeleteErrors, UserDeleteSuccess, UsersRetrievalErrors
+from chalicelib.responses.users import (
+    UsersCreationErrors,
+    UserCreationSuccess,
+    UsersRetrievalSuccess,
+    UserUpdateSuccess,
+    UserUpdateErrors,
+    UserDeleteErrors,
+    UserDeleteSuccess,
+    UsersRetrievalErrors,
+)
 
 
 class PorterDB:
     def __init__(self):
         aws_access_key_id = os.environ.get("CLIENT_ACCESS_KEY")
         aws_secret_access_key = os.environ.get("CLIENT_SECRET_ACCESS_KEY")
-        dynamodb = boto3.resource("dynamodb",
-                                  aws_access_key_id=aws_access_key_id,
-                                  aws_secret_access_key=aws_secret_access_key)
+        dynamodb = boto3.resource(
+            "dynamodb", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key
+        )
         self.table = dynamodb.Table("porterUsers")
 
     def _get_user_data_from_aws(self, user_id):
@@ -28,21 +36,21 @@ class PorterDB:
             if user_data:
                 return UsersCreationErrors.user_already_exists()
 
-            self.table.put_item(Item={
-                'userId': user_id,
-                "username": user["username"],
-                "email": user["email"],
-                "groupName": user["groupName"]
-            })
+            self.table.put_item(
+                Item={
+                    "userId": user_id,
+                    "username": user["username"],
+                    "email": user["email"],
+                    "groupName": user["groupName"],
+                }
+            )
             return UserCreationSuccess.user_added_to_dynamo_db()
         except Exception as exc:
             return UsersCreationErrors.user_default_error(500, str(exc))
 
     def get_user(self, user_id: str) -> Response:
-        response = self.table.query(
-            KeyConditionExpression=Key("userId").eq(str(user_id))
-        )
-        user_data = response.get('Items', None)
+        response = self.table.query(KeyConditionExpression=Key("userId").eq(str(user_id)))
+        user_data = response.get("Items", None)
         print(user_data)
         if user_data is None or len(user_data) == 0:
             return UsersRetrievalErrors.user_does_not_exist()
@@ -60,11 +68,7 @@ class PorterDB:
                     "userId": user_id,
                 },
                 UpdateExpression="set username=:n, groupName=:g, email=:e",
-                ExpressionAttributeValues={
-                    ":n": user["username"],
-                    ":g": user["groupName"],
-                    ":e": user["email"]
-                }
+                ExpressionAttributeValues={":n": user["username"], ":g": user["groupName"], ":e": user["email"]},
             )
             return UserUpdateSuccess.user_updated()
         except Exception as exc:
@@ -77,7 +81,7 @@ class PorterDB:
                 return UserDeleteErrors.user_does_not_exist()
             self.table.delete_item(
                 Key={
-                    'userId': user_id,
+                    "userId": user_id,
                 }
             )
             return UserDeleteSuccess.user_deleted()
@@ -86,9 +90,7 @@ class PorterDB:
 
     def get_users_with_common_groups(self, group_name: str) -> Response:
         try:
-            response = self.table.scan(
-                FilterExpression=Attr('groupName').eq(group_name)
-            )
+            response = self.table.scan(FilterExpression=Attr("groupName").eq(group_name))
             items = response.get("Items")
             if items is None:
                 return GroupErrors.group_does_not_exist()
@@ -101,9 +103,7 @@ class PorterDB:
 
     def update_users_group(self, group_name: str, user_names: list):
         try:
-            response = self.table.scan(
-                FilterExpression=Attr('username').is_in(user_names)
-            )
+            response = self.table.scan(FilterExpression=Attr("username").is_in(user_names))
             items = response.get("Items")
             if items is None:
                 return GroupErrors.group_does_not_exist()
@@ -114,10 +114,10 @@ class PorterDB:
                     user_id = user["userId"]
                     batch.put_item(
                         Item={
-                            'userId': user_id,
+                            "userId": user_id,
                             "username": user["username"],
                             "email": user["email"],
-                            "groupName": group_name
+                            "groupName": group_name,
                         }
                     )
             return GroupSuccessQuery.user_groups_updated()
@@ -126,9 +126,7 @@ class PorterDB:
 
     def delete_users_from_group(self, group_name: str):
         try:
-            response = self.table.scan(
-                FilterExpression=Attr('groupName').eq(group_name)
-            )
+            response = self.table.scan(FilterExpression=Attr("groupName").eq(group_name))
             items = response.get("Items")
             if items is None or len(items) == 0:
                 return GroupErrors.group_does_have_members()
@@ -137,11 +135,7 @@ class PorterDB:
                 for user in items:
                     if user["groupName"] == group_name:
                         user_id = user["userId"]
-                        batch.delete_item(
-                            Key={
-                                "userId": user_id
-                            }
-                        )
+                        batch.delete_item(Key={"userId": user_id})
             return GroupSuccessQuery.user_from_group_deleted()
         except Exception as exc:
             return GroupErrors.group_default_error(500, str(exc))
